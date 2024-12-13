@@ -1,35 +1,45 @@
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
+async function perguntarParaAPI(pergunta) {
+  const apiKey = "SUA_CHAVE_DE_API_AQUI"; // **SUBSTITUA PELA SUA CHAVE REAL**
+  const apiUrl = "https://api.openai.com/v1/chat/completions"; // Endpoint da API para chat completions
 
-// Middleware para interpretar JSON do corpo da requisição
-app.use(express.json());
+  const mensagens = [{ "role": "user", "content": pergunta }]; // Formato da mensagem para a API da OpenAI (chat completions)
 
-// Rota de teste (GET)
-app.get('/', (req, res) => {
-  res.send('API está funcionando!');
-});
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo", // Ou outro modelo disponível
+        messages: mensagens,
+      }),
+    });
 
-// Iniciar o servidor
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+    if (!response.ok) {
+        const errorData = await response.json(); // Tenta obter detalhes do erro da API
+        throw new Error(`Erro na requisição: ${response.status} - ${JSON.stringify(errorData)}`);
+    }
 
-app.post('/dados', (req, res) => {
-    debugger
-    const dadosRecebidos = req.body; 
-    // Supondo que o front esteja enviando um objeto JSON com:
-    // {
-    //   "nome": "valor",
-    //   "especie": "valor",
-    //   ...
-    // }
-  
-    console.log('Dados recebidos do front-end:', dadosRecebidos);
-  
-    // Aqui você pode processar, validar ou armazenar esses dados.
-    // Ex: Salvar em um banco de dados, enviar para outra API, etc.
-  
-    // Retornar uma resposta ao front-end
-    res.json({status: 'sucesso', mensagem: 'Dados recebidos com sucesso!', dados: dadosRecebidos});
-  });
+    const data = await response.json();
+    const resposta = data.choices[0].message.content;
+    return resposta;
+  } catch (error) {
+    console.error("Erro ao comunicar com a API:", error);
+    return "Erro ao processar a requisição."; // Ou lançar o erro novamente
+  }
+}
+
+// Exemplo de uso:
+async function exemploDeUso() {
+    const minhaPergunta = "Qual a capital da França?";
+    const respostaDoGPT = await perguntarParaAPI(minhaPergunta);
+    console.log("Resposta do GPT:", respostaDoGPT);
+
+    const perguntaComplexa = "Escreva um pequeno poema sobre o outono.";
+    const respostaPoema = await perguntarParaAPI(perguntaComplexa);
+    console.log("Poema do GPT:", respostaPoema);
+}
+
+exemploDeUso();
