@@ -1,15 +1,15 @@
 async function perguntarParaAPI(pergunta) {
-  const apiKey = "SUA_CHAVE_DE_API_AQUI"; // **SUBSTITUA PELA SUA CHAVE REAL**
+  const apiKey = process.env.APIGPT; // Pega a variável de ambiente configurada no Vercel
   const apiUrl = "https://api.openai.com/v1/chat/completions"; // Endpoint da API para chat completions
 
-  const mensagens = [{ "role": "user", "content": pergunta }]; // Formato da mensagem para a API da OpenAI (chat completions)
+  const mensagens = [{ role: "user", content: pergunta }]; // Formato da mensagem para a API da OpenAI (chat completions)
 
   try {
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo", // Ou outro modelo disponível
@@ -18,8 +18,8 @@ async function perguntarParaAPI(pergunta) {
     });
 
     if (!response.ok) {
-        const errorData = await response.json(); // Tenta obter detalhes do erro da API
-        throw new Error(`Erro na requisição: ${response.status} - ${JSON.stringify(errorData)}`);
+      const errorData = await response.json(); // Tenta obter detalhes do erro da API
+      throw new Error(`Erro na requisição: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
@@ -33,13 +33,13 @@ async function perguntarParaAPI(pergunta) {
 
 // Exemplo de uso:
 async function exemploDeUso() {
-    const minhaPergunta = "Qual a capital da França?";
-    const respostaDoGPT = await perguntarParaAPI(minhaPergunta);
-    console.log("Resposta do GPT:", respostaDoGPT);
+  const minhaPergunta = "Qual a capital da França?";
+  const respostaDoGPT = await perguntarParaAPI(minhaPergunta);
+  console.log("Resposta do GPT:", respostaDoGPT);
 
-    const perguntaComplexa = "Escreva um pequeno poema sobre o outono.";
-    const respostaPoema = await perguntarParaAPI(perguntaComplexa);
-    console.log("Poema do GPT:", respostaPoema);
+  const perguntaComplexa = "Escreva um pequeno poema sobre o outono.";
+  const respostaPoema = await perguntarParaAPI(perguntaComplexa);
+  console.log("Poema do GPT:", respostaPoema);
 }
 
 exemploDeUso();
